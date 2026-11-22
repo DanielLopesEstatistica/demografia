@@ -1,0 +1,130 @@
+---
+title: "Demografia Trab2"
+output: html_document
+date: "2023-04-30"
+---
+
+```{r}
+pop.datasus.2000=read.csv('RB_Idade_Sexo_2000.csv',sep=';', skip = 5, nrows = 33, header = FALSE)
+nasc.datasus.2000=read.csv('RB_Nascimentos_2000.csv',sep=';', skip = 5, nrows = 10, header = FALSE)
+
+colnames(pop.datasus.2000) = c("idade", "Homens", "Mulheres", "total")
+colnames(nasc.datasus.2000) = c("idade_mae", "Nascimentos")
+```
+
+```{r}
+pop.datasus.2010=read.csv('RB_Idade_Sexo_2010.csv',sep=';', skip = 5, nrows = 33, header = FALSE)
+nasc.datasus.2010=read.csv('RB_Nascimentos_2010.csv',sep=';', skip = 5, nrows = 8, header = FALSE)
+
+colnames(pop.datasus.2010) = c("idade", "Homens", "Mulheres", "total")
+colnames(nasc.datasus.2010) = c("idade_mae", "Nascimentos")
+```
+
+```{r}
+get_stats = function(pop.datasus, nasc.datasus){
+  TBN=sum(nasc.datasus[,2])/sum(pop.datasus[2:3])
+  TBN = TBN*1000
+  TBN = round(TBN,digits=4)
+  TFG=sum(nasc.datasus[,2])/sum(pop.datasus[16:26,3])
+  TFG = TFG*1000
+  TFG = round(TFG,digits=4)
+  nasc.datasus = nasc.datasus[2:8,]
+  Mulheres=c(sum(pop.datasus$Mulheres[16:20]),pop.datasus$Mulheres[21:26])
+  TEF=nasc.datasus$Nascimentos/Mulheres
+  TEF = round(TEF,digits=4)
+  TFT = sum(TEF)*5
+  TFT = round(TFT,digits=4)
+  df1 = data.frame(TBN = TBN, TFG = TFG, TFT = TFT)
+  df2 = data.frame(TEF = TEF)
+  lista = list(df1,df2)
+  return(lista)
+}
+```
+
+```{r}
+stats_2000 = get_stats(pop.datasus.2000, nasc.datasus.2000)
+stats_2000
+```
+
+```{r}
+stats_2010 = get_stats(pop.datasus.2010, nasc.datasus.2010)
+stats_2010
+```
+
+```{r}
+TBN=sum(nasc.datasus[,2])/sum(pop.datasus[2:3])
+TBN*1000
+```
+
+```{r}
+TFG=sum(nasc.datasus[,2])/sum(pop.datasus[16:26,3])
+TFG*1000
+```
+
+```{r}
+nasc.datasus = nasc.datasus[2:8,]
+```
+
+```{r}
+Mulheres=c(sum(pop.datasus$Mulheres[16:20]),pop.datasus$Mulheres[21:26])
+
+TEF=nasc.datasus$Nascimentos/Mulheres
+round(TEF,digits=4)
+```
+
+```{r}
+TFT=sum(TEF)*5
+TFT
+```
+
+```{r}
+plot(seq(15,45,5),TEF, main='Distribuição de Fecundidade -- Acre 2000', 
+     ylab='TEF',xlab='Grupos de idade',type='l', lwd=2)
+
+### Dados do Sidra ###
+pop.sidra=read.csv('Acre_2000_Sidra.csv',sep=',',skip=8)
+nasc.sidra=read.csv('Nascimentos_2000_sidra.csv',sep=',',skip =6)
+
+TEF.sidra=nasc.sidra$X/pop.sidra$X
+TEF.sidra
+
+## Grafico comparativo entre fontes ###
+plot(seq(15,45,5),TEF, main='Distribuição de Fecundidade. Acre, 2000. \n Comparacao entre fontes',
+     ylab='TEF',xlab='Grupos de idade',type='l', lwd=2)
+lines(seq(15,45,5),TEF.sidra, col='red',lwd=2)
+legend('topright',legend=c('Fonte Datasus', 'Fonte Sidra'),lwd=2, col=c('black','red'))
+```
+
+
+
+
+```{r}
+library(readxl)
+
+TEF2000 = read_excel("TEF2000.xlsx")
+TEF2000$pontos = 1:7
+TEF2000$Ano = rep(2000, 7)
+TEF2010 = read_excel("TEF2010.xlsx")
+TEF2010$pontos = 1:7
+TEF2010$Ano = rep(2010, 7)
+
+TEF = rbind(TEF2010, TEF2000)
+TEF$Ano = as.factor(TEF$Ano)
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(data = TEF)+
+  geom_point(aes(x = idade, y = tef, color = Ano))+
+  geom_line(data = TEF2000, aes(x = pontos, y = tef), color = "red")+
+  geom_point(aes(x = idade, y = tef, color = Ano))+
+  geom_line(data = TEF2010, aes(x = pontos, y = tef), color = "blue")+
+  scale_color_manual(values = c("red", "blue"), 
+                              labels = c("2000", "2010"))+
+  labs(title = "Comparação das Taxas Específicas de Fecundidade\nentre 2000 e 2010 no Rio Branco - AC",
+       y = "Taxa Específica de Fecundidade",
+       x = "Idade da Mãe")
+```
+
+

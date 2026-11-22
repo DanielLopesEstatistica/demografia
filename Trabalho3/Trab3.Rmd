@@ -1,0 +1,184 @@
+---
+title: "Trabalho3"
+author: "Daniel Lopes Toso"
+date: "2023-05-09"
+output: html_document
+---
+
+```{r}
+pop1980 = read.csv("rb1980_pop_sexo.csv", skip = 5,
+                   sep = ";", header = FALSE, nrows = 3)
+
+pop2010 = read.csv("rb2010_pop_sexo.csv", skip = 5,
+                   sep = ";", header = FALSE, nrows = 3)
+
+mort1980 = read.csv("rb1980_mortes_idade.csv", skip = 5,
+                   sep = ";", header = FALSE, nrows = 14)
+
+mort2010 = read.csv("rb2010_mortes_idade.csv", skip = 5,
+                   sep = ";", header = FALSE, nrows = 13)
+
+cens1980 = read.csv("rb1980_cens.csv", skip = 5,
+                   sep = ";", header = FALSE, nrows = 14)
+
+cens2010 = read.csv("rb2010_cens.csv", skip = 5,
+                   sep = ";", header = FALSE, nrows = 13)
+```
+
+```{r}
+TMI1980 = mort1980[1,2]/cens1980[1,2] * 1000
+TMI2010 = mort2010[1,2]/cens2010[1,2] * 1000
+```
+
+```{r}
+TM51980 = (mort1980[1,2] + mort1980[2,2])/(cens1980[1,2] + cens1980[2,2]) * 1000
+TM52010 = (mort2010[1,2] + mort2010[2,2])/(cens2010[1,2] + cens2010[2,2]) * 1000
+```
+
+```{r}
+TBM1980 = mort1980[14,2]/cens1980[14,2] * 1000
+TBM2010 = mort2010[13,2]/cens2010[13,2] * 1000
+```
+
+```{r}
+TEM1980 = mort1980[1:12,2]/cens1980[1:12,2]
+TEM2010 = mort2010[1:12,2]/cens2010[1:12,2]
+```
+
+```{r}
+data.frame(ANO = c(1980, 2010), TMI = c(TMI1980, TMI2010), TM5 = c(TM51980, TM52010), TBM = c(TBM1980, TBM2010))
+
+data.frame(TEM1980, TEM2010)
+```
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+Faixa_Etaria = c("Menor 1 ano", "1 a 4 anos", "5 a 9 anos", "10 a 14 anos", 
+                 "15 a 19 anos", "20 a 29 anos", "30 a 39 anos", "40 a 49 anos", 
+                 "50 a 59 anos", "60 a 69 anos", "70 a 79 anos", "80 anos e mais")
+
+df_mort1980 = data.frame(mort1980[1:12,1] |> unlist(), log(mort1980[1:12,2]/cens1980[1:12,2]))
+df_mort2010 = data.frame(mort2010[1:12,1] |> unlist(), log(mort2010[1:12,2]/cens2010[1:12,2]))
+colnames(df_mort1980) = c("X1", "Y1")
+colnames(df_mort2010) = c("X2", "Y2")
+df_mort1980$Ano = "1980"
+df_mort2010$Ano = "2010"
+df_mort1980$X1 = factor(df_mort1980$X1, levels = Faixa_Etaria)
+df_mort2010$X2 = factor(df_mort2010$X2, levels = Faixa_Etaria)
+
+ordem_cores = c("1980" = "#00BA38", "2010" = "#A020F0")
+
+plot1 = ggplot()+
+  geom_point(data = df_mort1980, aes(x = X1, y = Y1, color = Ano), size = 5)+
+  geom_line(data = df_mort1980, aes(x = 1:12, y = Y1, color = Ano), linewidth = 2)+
+  geom_point(data = df_mort2010, aes(x = X2, y = Y2, color = Ano), size = 5)+
+  geom_line(data = df_mort2010, aes(x = 1:12, y = Y2, color = Ano), size = 2)+
+  labs(x = "Idade", y = "Log da Taxa Bruta de Mortalidade",
+       title = "Comparação das Taxas Brutas de Mortalidade por Idade em 1980 e 2010 no Rio Branco - AC")+
+  theme_classic()+
+  scale_color_manual(name = "Ano",values = ordem_cores)+
+  theme(axis.text.x = element_text(size = 12,
+                                   angle = -45, hjust = 0),
+        axis.title.y = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 12),
+        legend.text = element_text(size = 12),
+        legend.title = element_text(size = 14, face = "bold"))
+
+plot1
+```
+
+```{r}
+cens_sexo1980 = read.csv("rb1980_censo_sexo.csv", skip = 5,
+                   sep = ";", header = FALSE, nrows = 14)
+
+cens_sexo2010 = read.csv("rb2010_censo_sexo.csv", skip = 5,
+                   sep = ";", header = FALSE, nrows = 13)
+
+mort_sexo1980 = read.csv("rb1980_mort_sexo.csv", skip = 5,
+                   sep = ";", header = FALSE, nrows = 14)
+
+mort_sexo2010 = read.csv("rb2010_mort_sexo.csv", skip = 5,
+                   sep = ";", header = FALSE, nrows = 13)
+```
+
+```{r}
+TEM1980F = as.numeric(mort_sexo1980[1:12,3])/cens_sexo1980[1:12,3] * 1000
+TEM1980M = mort_sexo1980[1:12,2]/cens_sexo1980[1:12,2] * 1000
+
+TEM2010F = as.numeric(mort_sexo2010[1:12,3])/cens_sexo2010[1:12,3] * 1000
+TEM2010M = mort_sexo2010[1:12,2]/cens_sexo2010[1:12,2] * 1000
+
+df_tem1980 = data.frame(TEM1980F, TEM1980M)
+df_tem2010 = data.frame(TEM2010F, TEM2010M)
+
+df_tem1980
+df_tem2010
+```
+
+```{r}
+brasil_censo = read.csv("censo2010.csv", skip = 4,
+                   sep = ";", header = FALSE, nrows = 12)
+
+brasil_mortes = read.csv("morte2010.csv", skip = 4,
+                   sep = ";", header = FALSE, nrows = 12)
+```
+
+```{r}
+ObitosEsperados1980 = TEM1980*brasil_censo[,3]
+
+TBM1980PADRAO = sum(ObitosEsperados1980)/sum(brasil_censo[,3]) * 1000
+
+ObitosEsperados2010 = TEM2010*brasil_censo[,3]
+
+TBM2010PADRAO = sum(ObitosEsperados2010)/sum(brasil_censo[,3]) * 1000
+
+data.frame(ANO = c(1980, 2010), TMI = c(TMI1980, TMI2010),
+           TM5 = c(TM51980, TM52010), TBM = c(TBM1980, TBM2010),
+           TBMPADRAO = c(TBM1980PADRAO, TBM2010PADRAO))
+```
+
+```{r}
+df_padrao1980 = df_mort1980
+df_padrao2010 = df_mort2010
+
+df_padrao1980$Y1 = log(ObitosEsperados1980/brasil_censo[,3])
+df_padrao2010$Y1 = log(ObitosEsperados2010/brasil_censo[,3])
+
+plot2 = ggplot()+
+  geom_point(data = df_padrao1980, aes(x = X1, y = Y1, color = Ano), size = 5)+
+  geom_line(data = df_padrao1980, aes(x = 1:12, y = Y1, color = Ano), linewidth = 2)+
+  geom_point(data = df_padrao2010, aes(x = X2, y = Y2, color = Ano), size = 5)+
+  geom_line(data = df_padrao2010, aes(x = 1:12, y = Y2, color = Ano), size = 2)+
+  labs(x = "Idade", y = "Log da Taxa Bruta de Mortalidade",
+       title = "Comparação das Taxas Brutas de Mortalidade por Idade em 1980 e 2010 no Rio Branco - AC")+
+  theme_classic()+
+  scale_color_manual(name = "Ano",values = ordem_cores)+
+  theme(axis.text.x = element_text(size = 12,
+                                   angle = -45, hjust = 0),
+        axis.title.y = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(face = "bold", size = 12),
+        legend.text = element_text(size = 12),
+        legend.title = element_text(size = 14, face = "bold"))
+
+plot2
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

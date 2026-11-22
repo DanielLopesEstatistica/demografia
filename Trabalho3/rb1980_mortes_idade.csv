@@ -1,0 +1,20 @@
+ Mortalidade - Brasil
+Óbitos p/Residênc por Faixa Etária
+Município: 120040 RIO BRANCO
+Período:1980
+"Faixa Etária";"Óbitos_p/Residênc"
+"Menor 1 ano";256
+"1 a 4 anos";48
+"5 a 9 anos";23
+"10 a 14 anos";11
+"15 a 19 anos";25
+"20 a 29 anos";74
+"30 a 39 anos";57
+"40 a 49 anos";61
+"50 a 59 anos";76
+"60 a 69 anos";64
+"70 a 79 anos";96
+"80 anos e mais";55
+"Idade ignorada";2
+"Total";848
+ Fonte: MS/SVS/CGIAE - Sistema de Informações sobre Mortalidade - SIM

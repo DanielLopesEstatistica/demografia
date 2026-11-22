@@ -1,0 +1,26 @@
+ Nascidos vivos - Brasil
+Nascim p/resid.mãe por Idade da mãe
+Município: 120040 RIO BRANCO
+Período:2010
+"Idade da mãe";"Nascim_p/resid.mãe"
+"10 a 14 anos";79
+"15 a 19 anos";1507
+"20 a 24 anos";1803
+"25 a 29 anos";1516
+"30 a 34 anos";1035
+"35 a 39 anos";399
+"40 a 44 anos";91
+"45 a 49 anos";7
+"Total";6437
+ Fonte: MS/SVS/DASIS - Sistema de Informações sobre Nascidos Vivos - SINASC
+ Nota:
+ 
+ Em 2011, houve uma mudança no conteúdo da Declaração de Nascidos Vivos, com maior detalhamento das informações coletadas. Para este ano, foram
+ utilizados simultaneamente os dois formulários. Para mais detalhes sobre as mudanças ocorridas e os seus efeitos, veja o documento
+ "Consolidação do Sistema de Informações sobre Nascidos Vivos - 2011".
+ 
+ * A categorização da "Adequação quantitativa de pré-natal" mostrada na variável "Adeq quant pré-natal" considera o início do
+ pré-natal no primeiro trimestre e um mínimo de seis consultas de pré-natal –, sendo gravada em campo chamado Kotelchuck no
+ arquivo disponível para download, calculado a partir dos campos “33 – Número de consultas pré-natal” (Mesprenat) e “34 – Mês de gestação em que iniciou o pré-natal” (Consprenat).
+ Maiores informações no documento "Saúde Brasil 2017: uma análise da situação de saúde e os desafios para o alcance dos Objetivos de Desenvolvi
+ 

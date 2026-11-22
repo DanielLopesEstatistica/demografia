@@ -1,0 +1,29 @@
+ Mortalidade - São Paulo
+Óbitos p/Residênc por Faixa Etária det e Sexo
+Município: 355030 SAO PAULO
+Capítulo CID-9: II.  Neoplasmas
+Período:1980
+"Faixa Etária det";"Masc";"Fem";"Total"
+"7 a 27 dias";-;1;1
+"28 a 364 dias";7;9;16
+"1 a 4 anos";37;26;63
+"5 a 9 anos";24;17;41
+"10 a 14 anos";21;29;50
+"15 a 19 anos";34;30;64
+"20 a 24 anos";36;32;68
+"25 a 29 anos";54;40;94
+"30 a 34 anos";74;71;145
+"35 a 39 anos";85;106;191
+"40 a 44 anos";162;182;344
+"45 a 49 anos";247;258;505
+"50 a 54 anos";401;341;742
+"55 a 59 anos";453;368;821
+"60 a 64 anos";526;378;904
+"65 a 69 anos";545;409;954
+"70 a 74 anos";471;364;835
+"75 a 79 anos";326;318;644
+"80 anos e mais";268;293;561
+"Idade ignorada";1;-;1
+"Total";3772;3272;7044
+ Fonte: MS/SVS/CGIAE - Sistema de Informações sobre Mortalidade - SIM
+ Consulte o site da Secretaria Estadual de Saúde para mais informações.

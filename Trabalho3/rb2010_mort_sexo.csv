@@ -1,0 +1,27 @@
+ Mortalidade - Brasil
+Óbitos p/Residênc por Faixa Etária e Sexo
+Município: 120040 RIO BRANCO
+Período:2010
+"Faixa Etária";"Masc";"Fem";"Total"
+"Menor 1 ano";62;55;117
+"1 a 4 anos";11;10;21
+"5 a 9 anos";4;6;10
+"10 a 14 anos";5;8;13
+"15 a 19 anos";29;13;42
+"20 a 29 anos";70;29;99
+"30 a 39 anos";83;46;129
+"40 a 49 anos";89;53;142
+"50 a 59 anos";134;87;221
+"60 a 69 anos";131;97;228
+"70 a 79 anos";159;87;246
+"80 anos e mais";180;142;322
+"Total";957;633;1590
+ Fonte: MS/SVS/CGIAE - Sistema de Informações sobre Mortalidade - SIM
+ Nota:
+ 
+ Em 2011, houve uma mudança no conteúdo da Declaração de Óbito, com maior detalhamento das informações coletadas. Para este ano, foram
+ utilizados simultaneamente os dois formulários. Para mais detalhes sobre as mudanças ocorridas e os seus efeitos, veja o documento
+ "Sistema de Informações sobre Mortalidade - SIM. Consolidação da base de dados de 2011".
+ No dia 13/06/2019, os arquivos do SIM referentes ao ano de notificação 2017 foram atualizados, com alteração das causas básicas de 2 registros e exclusão de 1 registro.
+ No dia 01/04/2020, os arquivos do SIM referentes ao ano de notificação 2019 foram atualizados, com alteração das causas básicas de 4 registros e exclusão de 1 registro.
+ 

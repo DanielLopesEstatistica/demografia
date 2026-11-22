@@ -1,0 +1,167 @@
+---
+title: "TrabalhoDemografia"
+output: html_document
+date: "2023-04-09"
+---
+
+```{r}
+rb1980 <- read.csv('Acre1980.csv',sep=';', skip=6, nrows=33, header=F)
+colnames(rb1980) = c('Idade','Masculino','Feminino','Total') 
+
+rownames(rb1980) = rb1980$Idade
+rb1980 = rb1980[,-1]
+
+grupo_idade = cut(rep(0:32),breaks=c(0,0.99,4,9,14,19,20,21,22,23,24,25,26,27,28,29,30,31,32),include.lowest = T)
+
+rb1980.n = aggregate(rb1980,list(Idade=grupo_idade),sum)
+
+rb1980.n$Idade = c(0,1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80)
+
+rb1980.n.1 = with(rb1980.n, colSums(rb1980.n[rb1980.n$Idade<5,2:3]))
+
+rb1980.n.2 = rb1980.n[-(1:2),2:3]
+
+rb1980.p = rbind(rb1980.n.1,rb1980.n.2)/sum(rb1980$Total)
+
+rb1980.p$idade = c(0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80)
+
+library(plotrix)
+idades = c("0-4","5-9","10-14","15-19","20-24","25-29","30-34",
+           "35-39","40-44","45-49","50-54","55-59","60-64","65-69","70-74",
+           "75-79","80+")
+
+windows(height=10,width=15)
+pyramid.plot(rb1980.p$Masculino*100,rb1980.p$Feminino*100,labels=idades,unit='%',
+             main="Pirâmide Populacional -- Rio Branco 1980", 
+             top.labels=c("Homens","Idades","Mulheres"),lxcol='blue',rxcol='red',
+             gap=1,show.values=TRUE)
+
+RS = rb1980.n$Masculino/rb1980.n$Feminino
+
+idad = c("0","1-4","5-9","10-14","15-19","20-24","25-29","30-34",
+         "35-39","40-44","45-49","50-54","55-59","60-64","65-69","70-74",
+         "75-79","80+")
+
+windows(height=10, width=15)
+plot(c(0,1,seq(5,80,5)),RS,type='l', ylim=c(0.5,1.6), lwd=2, col='blue',
+     ylab='Razao entre os sexos',xlab='Grupos de idade', 
+     main='Razao entre os sexos por idade')
+legend('topleft',legend='Razao entre os sexos por idade',lwd=2, col='blue')
+
+Jovens = with(rb1980.n, sum(rb1980.n[rb1980.n$Idade<15,4]))
+Idosos = with(rb1980.n, sum(rb1980.n[rb1980.n$Idade>60, 4]))
+
+pop.ativa = with(rb1980.n, sum(rb1980.n[rb1980.n$Idade>10 & Idade<65,4]))
+
+RD.jovens = (Jovens/pop.ativa)*100
+RD.idosos = (Idosos/pop.ativa)*100
+
+df_rb1980 = data.frame(RD_Jovens = RD.jovens, RD_Idosos = RD.idosos, RS_Nascer = RS[1], Pop_Total = sum(rb1980$Total))
+RS_1980 = RS
+
+df_rb1980
+```
+
+```{r}
+rb2010 <- read.csv('Acre2010.csv',sep=';', skip=6, nrows=33, header=F)
+colnames(rb2010) = c('Idade','Masculino','Feminino','Total') 
+
+rownames(rb2010) = rb2010$Idade
+rb2010 = rb2010[,-1]
+
+grupo_idade = cut(rep(0:32),breaks=c(0,0.99,4,9,14,19,20,21,22,23,24,25,26,27,28,29,30,31,32),include.lowest = T)
+
+rb2010.n = aggregate(rb2010,list(Idade=grupo_idade),sum)
+
+rb2010.n$Idade = c(0,1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80)
+
+rb2010.n.1 = with(rb2010.n, colSums(rb2010.n[rb2010.n$Idade<5,2:3]))
+
+rb2010.n.2 = rb2010.n[-(1:2),2:3]
+
+rb2010.p = rbind(rb2010.n.1,rb2010.n.2)/sum(rb2010$Total)
+
+rb2010.p$idade = c(0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80)
+
+library(plotrix)
+idades = c("0-4","5-9","10-14","15-19","20-24","25-29","30-34",
+           "35-39","40-44","45-49","50-54","55-59","60-64","65-69","70-74",
+           "75-79","80+")
+
+windows(height=10,width=15)
+pyramid.plot(rb2010.p$Masculino*100,rb2010.p$Feminino*100,labels=idades,unit='%',
+             main="Pirâmide Populacional -- Rio Branco 2010", 
+             top.labels=c("Homens","Idades","Mulheres"),lxcol='blue',rxcol='red',
+             gap=1,show.values=TRUE)
+
+RS = rb2010.n$Masculino/rb2010.n$Feminino
+
+idad = c("0","1-4","5-9","10-14","15-19","20-24","25-29","30-34",
+         "35-39","40-44","45-49","50-54","55-59","60-64","65-69","70-74",
+         "75-79","80+")
+
+windows(height=10, width=15)
+plot(c(0,1,seq(5,80,5)),RS,type='l', ylim=c(0.5,1.6), lwd=2, col='blue',
+     ylab='Razao entre os sexos',xlab='Grupos de idade', 
+     main='Razao entre os sexos por idade')
+legend('topleft',legend='Razao entre os sexos por idade',lwd=2, col='blue')
+
+Jovens = with(rb2010.n, sum(rb2010.n[rb2010.n$Idade<15,4]))
+Idosos = with(rb2010.n, sum(rb2010.n[rb2010.n$Idade>60, 4]))
+
+pop.ativa = with(rb2010.n, sum(rb2010.n[rb2010.n$Idade>10 & Idade<65,4]))
+
+RD.jovens = (Jovens/pop.ativa)*100
+RD.idosos = (Idosos/pop.ativa)*100
+
+df_rb2010 = data.frame(RD_Jovens = RD.jovens, RD_Idosos = RD.idosos, RS_Nascer = RS[1], Pop_Total = sum(rb2010$Total))
+RS_2010 = RS
+
+df_rb2010
+```
+
+```{r}
+pop_rb1980 = df_rb1980[1,4] |> unlist()
+pop_rb2010 = df_rb2010[1,4] |> unlist()
+TaxaCrescimento_geo = (((pop_rb2010/pop_rb1980)^(1/30))-1)*100
+TaxaCrescimento_exp = (log(pop_rb2010/pop_rb1980)/11)*100
+```
+
+```{r}
+library(tidyverse)
+
+df_RS = rbind(cbind(RS_2010, rep(2010, 18), rb1980.n$Idade),
+              cbind(RS_1980, rep(1980, 18), rb1980.n$Idade))
+
+df_RS = as.data.frame(df_RS)
+colnames(df_RS) = c("RS", "Ano", "Idade")
+df_RS$Ano = as.factor(df_RS$Ano)
+
+ggplot()+
+  geom_line(data = (df_RS |> filter(Ano == 1980)), aes(x = Idade, y = RS, color = Ano))+
+  geom_line(data = (df_RS |> filter(Ano == 2010)), aes(x = Idade, y = RS, color = Ano))+
+  geom_line(aes(x = rb1980.n$Idade, y = 1))+
+  scale_y_continuous(limits = c(0.6, 1.4), expand = c(0, 0), breaks = seq(0.6, 1.4, 0.1))+
+  ylab("Razão de Sexo em Rio Branco - Acre")
+  
+```
+
+```{r}
+library(kableExtra)
+
+df_RD = rbind(df_rb1980, df_rb2010)
+rownames(df_RD) = c("1980", "2010")
+df_RD$RS_Nascer = df_RD$RD_Jovens + df_RD$RD_Idosos
+colnames(df_RD) = c("Razão de Dependência de Jovens", "Razão de Dependência de Idosos",
+                    "Razão de Dependência Total", "População Total")
+
+
+
+tabela <- kable(df_RD, booktabs = TRUE) %>%
+  kable_styling(latex_options = "striped", full_width = FALSE)
+
+tabela
+```
+
+
+

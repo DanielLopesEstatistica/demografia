@@ -1,0 +1,624 @@
+---
+title: "Trabalho 4 Demografia"
+output: html_document
+date: "2023-06-03"
+---
+
+##col 1 = n
+##col 2 = numero de mortes observadas
+##col 3 = população exposta
+##col 4 = taxa de mortalidade observada
+##col 5 = tempo medio de vida das pessoas que morreram
+##col 6 = probabilidade de morte 
+##col 7 = probabilidade de viver até o proximo ano
+##col 8 = corte hipotetica
+##col 9 = estima numero de mortes
+##col 10 = idades vividas
+##col 11 = taxa de mortalidade
+##col 12 = quem nasceu, vai ter pessoas anos vividos
+##col 13 = esperança de vida
+##col 14 = idade
+
+```{r}
+mort2010 = read.csv("MortalidadeSP2010.csv", sep = ";",
+                    skip = 5, nrows = 21, header = FALSE)[,1:3]
+
+pop2010 = read.csv("PopulacaoSP2010.csv", sep = ";", skip = 5, nrows = 33,
+                   header = FALSE)[,1:3]
+
+mort1980 = read.csv("MortalidadeSP1980.csv", sep = ";",
+                    skip = 5, nrows = 21, header = FALSE)[,1:3]
+
+pop1980 = read.csv("PopulacaoSP1980.csv", sep = ";", skip = 5, nrows = 33,
+                   header = FALSE)[,1:3]
+
+neo1980 = read.csv("NeoplasiasSP1980.csv", sep = ";",
+                    skip = 5, nrows = 21, header = FALSE)[,1:3]
+
+neo1980[c(5:21),] = neo1980[c(4:20),]
+neo1980[4,] = c("0", 0, 0)
+
+neo2010 = read.csv("NeoplasiasSP2010.csv", sep = ";",
+                    skip = 5, nrows = 21, header = FALSE)[,1:3]
+
+neo2010[c(5:21),] = neo2010[c(4:20),]
+neo2010[4,] = c("0", 0, 0)
+
+ext1980 = read.csv("CausaExternaSP1980.csv", sep = ";",
+                    skip = 5, nrows = 21, header = FALSE)[,1:3]
+
+ext2010 = read.csv("CausaExternaSP2010.csv", sep = ";",
+                    skip = 5, nrows = 21, header = FALSE)[,1:3]
+ext1980[c(5:21),] = ext1980[c(4:20),]
+ext1980[4,] = c("0", 0, 0)
+```
+
+```{r}
+clean_vector_mort = function(vec){
+  vec = as.numeric(vec)
+  vec = ifelse(is.na(vec), 0, vec)
+  vec[1] = sum(vec[1:4])
+  vec = vec[-c(2:4)]
+  return(vec)
+}
+
+clean_vector_pop = function(vec){
+  vec = as.numeric(vec)
+  vec = ifelse(is.na(vec), 0, vec)
+  vec[2] = sum(vec[2:5])
+  vec[3] = sum(vec[6:10])
+  vec[4] = sum(vec[11:15])
+  vec[5] = sum(vec[16:20])
+  vec = vec[-c(6:20)]
+  return(vec)
+ }
+
+get_life_table = function(pop, mort, fem = FALSE, causa_mortis = NULL){
+  pop = clean_vector_pop(pop) |> suppressWarnings()
+  mort = clean_vector_mort(mort) |> suppressWarnings()
+  
+  if(!is.null(causa_mortis)){
+    causa_mortis = causa_mortis |> clean_vector_mort() |> suppressWarnings()
+  }
+  
+    ## Entrando com total de as mortes no periodo no periodo -- homens ate 85+
+  mortes.t<-mort
+  
+  mortes.hiv<-causa_mortis
+  
+  ## Entrando com as exposicao -- 85+
+  expos<- pop
+  
+  ##Criando os intervalos etarios ate 85+
+  n<-c(1,4,rep(5,16))
+  
+  idade=c(0,1,seq(5,80,5))
+  
+  ## dados para as estimativas
+  dados=as.data.frame(cbind(idade,n,mortes.hiv,mortes.t,expos))
+  
+  ##### Estimando uma tabela de vida normal ######
+  
+  ## Estimando as taxas especificas de mortalidade, nMx, para todas as mortes
+  dados$nMx<-round(dados$mortes.t/dados$expos, digits=5)
+  
+  ### Estimando os nax ###
+  dados$nax<-1
+  
+  ## Estimando os nax a partir da idade de 5 anos ate o penultimo grupo de idade
+  for(i in 3:17){dados$nax[i]<-round(2.5,digits=2)}
+  
+  ##Para o ultimo grupo de idade da tabua. No nosso caso 85+
+  dados$nax[18]<-round(1/dados$nMx[18],digits=2) ##inverso da ?ltima taxa
+  
+  ## ax para os primeiros grupos de idade - homens
+  if(!fem){
+    dados$nax[1]<-round(ifelse(dados$nMx[1]<0.107,0.045+2.684*dados$nMx[1],0.330), digits=2)
+    dados$nax[2]<-round(ifelse(dados$nMx[1]<0.107,1.651-2.816*dados$nMx[1],1.352), digits=2)  
+  }
+  ## ax para mulheres
+  else{
+    dados$nax[1]<-round(ifelse(dados$nMx[1]<0.107,0.045+2.684*dados$nMx[1],0.330), digits=2)
+    dados$nax[2]<-round(ifelse(dados$nMx[1]<0.107,1.651-2.816*dados$nMx[1],1.352), digits=2)
+  }
+                                                                                 
+  ## Estimando as probabilidades de morte nqx
+  for (i in 1:17){dados$nqx[i]<-(dados$n[i]*dados$nMx[i])/
+  ((1)+((dados$n[i]-dados$nax[i])*dados$nMx[i]))}
+  
+  ## A probabilidade de morte para ?ltima idade da t?bua
+  dados$nqx[18]<-1
+  
+  ## EStimando as probabilidades de sobreviv?ncia npx
+  dados$npx<-(1-dados$nqx)
+  
+  ## Criando uma coorte hipotetica e aplicando as probabilidades de sobrevivencia para gerar o lx
+  dados$lx<-100000 #estabelecendo o raiz da tabua
+  
+  ## para os demais grupos de idade
+  for (i in 2:18){dados$lx[i]<-(dados$npx[i-1]*dados$lx[i-1])}
+  
+  ## Estimando o numero de mortes de tabela ndx
+  for (i in 1:17){dados$ndx[i]<-dados$lx[i]-dados$lx[i+1]}
+  
+  ## Para o ultimo grupo de idade
+  dados$ndx[18]<-dados$lx[18]
+  
+  ## Estimando o pessoas-ano vivido da tabela de vida Lx
+  ## Todos que viveram ate o fim do intervalo + aqueles que viveram certo tempo e morreram antes de completar a ultima idade do intervalo
+  
+  for (i in 1:17){dados$nLx[i]<-((dados$n[i]*dados$lx[i+1])+(dados$ndx[i]*dados$nax[i]))}
+  
+  ## Para o ultimo grupo de idade mortes/taxa
+  dados$nLx[18]<-dados$ndx[18]/dados$nMx[18]
+  
+  ## Estimando o Tx - pessoas-ano acima da idade x
+  dados$Tx<-(rev(cumsum(rev(dados$nLx))))
+  
+  
+  ## Estimando a esperanca de vida ex = Tx/lx
+  dados$ex<-round(dados$Tx/dados$lx,digits=2)
+  
+  tabua = dados
+  if(causa_mortis |> is.null()){
+    return(tabua)
+  }
+  
+  ###################################################################################
+  ## Vamos estimar a esperanca de vida caso AIDS fosse eliminada entre os homens ####
+  ###################################################################################
+  
+  ## Proporcao de mortes, sem AIDS
+  p.no.aids=(dados$mortes.t-dados$mortes.hiv)/dados$mortes.t
+  p.no.aids
+  
+  tabua.s.hiv=data.frame(cbind(idade,n,p.no.aids))
+  
+  ## Extraindo da probabilidade de sobrevivencia essa proporcao = px^proporcao
+  tabua.s.hiv$npx.n=tabua$npx^tabua.s.hiv$p.no.aids
+  
+  ## Novo nqx = 1-npx
+  tabua.s.hiv$nqx.n=1-tabua.s.hiv$npx.n
+  
+  ##Criando uma coorte hipotetica e aplicando as probabilidades de sobrevivencia para gerar o lx
+  tabua.s.hiv$lx<-100000 # estabelecendo o raiz da tabua
+  
+  ##para os demais grupos de idade
+  for (i in 2:18){tabua.s.hiv$lx[i]<-(tabua.s.hiv$npx.n[i-1]*tabua.s.hiv$lx[i-1])}
+  
+  ##Estimando o numero de mortes de tabela ndx
+  for (i in 1:17){tabua.s.hiv$ndx[i]<-tabua.s.hiv$lx[i]-tabua.s.hiv$lx[i+1]}
+  
+  ##Para o ultimo grupo de idade
+  tabua.s.hiv$ndx[18]<-tabua.s.hiv$lx[18]
+  
+  ###############
+  ### nax novo ##
+  ###############
+  
+  ## Para os grupos de idade 0 a 9 e penultimo da tabua
+  ## = n + p.sem.causa*(nqx/nqx.n)*(nax-n)
+  tabua.s.hiv$nax.n=tabua.s.hiv$n+tabua.s.hiv$p.no.aids*(tabua$nqx/tabua.s.hiv$nqx.n)*(tabua$nax-tabua.s.hiv$n)
+  
+  ## Para os demais grupos com intervalo de 5 anos, assume-se que as mortes seguem uma funcao quadratica sobre os intervalos x-5 a x+10, assim:
+  
+  ## No nosso caso, 
+  for (i in 4:17){tabua.s.hiv$nax.n[i]=((tabua.s.hiv$ndx[i-1]*-5/24)+2.5*tabua.s.hiv$ndx[i]+(tabua.s.hiv$ndx[i+1]*5/24))/tabua.s.hiv$ndx[i]}
+  
+  # para o ultimo grupo
+  tabua.s.hiv$nax.n[18]=tabua$ex[18]/tabua.s.hiv$p.no.aids[18]
+  
+  
+  ## Estimando o pessoas-ano vivido da tabela de vida Lx
+  ##Todos que viveram ate o fim do intervalo + aqueles que viveram certo tempo e morreram antes de completar a ultima idade do intervalo
+  
+  for (i in 1:17){tabua.s.hiv$nLx[i]<-((tabua.s.hiv$n[i]*tabua.s.hiv$lx[i+1])+(tabua.s.hiv$ndx[i]*tabua.s.hiv$nax.n[i]))}
+  
+  ##Para o ultimo grupo de idade mortes/taxa
+  tabua.s.hiv$nLx[18]<-tabua.s.hiv$ndx[18]*tabua.s.hiv$nax.n[18]
+  
+  ##Estimando o Tx - pessoas-ano acima da idade x
+  tabua.s.hiv$Tx<-(rev(cumsum(rev(tabua.s.hiv$nLx))))
+  
+  
+  ##Estimando a esperanca de vida ex = Tx/lx
+  tabua.s.hiv$ex.n<-round(tabua.s.hiv$Tx/tabua.s.hiv$lx,digits=2)
+  
+  return(tabua.s.hiv)
+}
+```
+
+```{r}
+library(knitr)
+library(kableExtra)
+```
+
+```{r}
+lista_mort = list(mort1980$V2, mort2010$V2, mort1980$V3, mort2010$V3)
+lista_pop = list(pop1980$V2, pop2010$V2, pop1980$V3, pop2010$V3)
+
+lista_matrizes_norm = list()
+
+
+for(n in 1:4){
+  if(n > 2){
+    fem = TRUE
+  }
+  else{
+    fem = FALSE
+  }
+  tabela = get_life_table(lista_pop[[n]], lista_mort[[n]], fem = fem)
+  lista_matrizes_norm[[n]] = tabela
+  
+  if(n == 1){
+    tabela = tabela[,c(1,3,4,ncol(tabela))]
+    main_tabela = tabela
+  }
+  else{
+    tabela = tabela[,c(3,4,ncol(tabela))]
+    main_tabela = cbind(main_tabela, tabela)
+  }
+}
+
+```
+
+
+```{r}
+alternar_cores <- function(i) {
+    cor_linhas[(i %% length(cor_linhas)) + 1]
+  }
+
+prettify <- function(minha_matriz){
+  meu_dataframe <- as.data.frame(minha_matriz)
+  if(ncol(meu_dataframe) != 11){
+    colnames(meu_dataframe) = c("Faixa Etária", rep(c("Mortes", "População", "Exp.de Vida"),4))
+  }
+  
+  meu_dataframe[,1] = c("0< anos", "1 a 4 anos", "5 a 9 anos", "10 a 14 anos", "15 a 19 anos", "20 a 24 anos",
+                        "25 a 29 anos", "30 a 34 anos", "35 a 39 anos", "40 a 44 anos", "45 a 49 anos",
+                        "50 a 54 anos", "55 a 59 anos", "60 a 64 anos", "65 a 69 anos", "70 a 74 anos",
+                        "75 a 79 anos", "+80 anos")
+  
+  # Criar a tabela básica
+  tabela_basica <- kable(meu_dataframe)
+  
+  
+  # Definir paleta de cores
+  paleta_cores <- c("#dbdbdb", "#ffffff") # Azul claro e rosa claro
+  
+  # Aplicar formatação na tabela
+  tabela_estilizada <- tabela_basica %>%
+    kable_styling(full_width = FALSE) %>%
+    row_spec(0, bold = TRUE, italic = TRUE) %>%
+    row_spec(seq(1, 18, by = 2), background = paleta_cores[1]) %>%
+    row_spec(seq(2, 18, by = 2), background = paleta_cores[2]) %>%
+    column_spec(1, bold = TRUE) %>%
+    collapse_rows(columns = 2:ncol(minha_matriz), valign = "middle") %>%
+    row_spec(0, bold = TRUE, italic = TRUE, color = "white",
+             background = "#ff4747")
+
+
+  return(tabela_estilizada)
+}
+
+prettify_tabua = function(minha_matriz, header = "Tabela", norm = FALSE, causa = NULL){
+  meu_dataframe <- as.data.frame(minha_matriz)
+  
+  numero = ncol(meu_dataframe)
+  
+  if(numero == 13 && !norm){
+    colnames(meu_dataframe) = c("Faixa Etária", rep(c("Mortes", "População", "Exp.de Vida"),4))
+  }
+  
+  if(norm && numero == 13){
+    colnames(meu_dataframe) = c("Faixa Etária", "n", "Mortes", "Pop.", "nMx", "nax",
+                                "nqx", "npx", "lx", "ndx", "nLx", "Tx", "Exp. Vida")
+  }
+  if(!norm && numero == 11){
+    colnames(meu_dataframe) = c("Faixa Etária", "n", paste("p.no.", causa, sep = ""),
+                                "npx.n", "nqx.n", "lx", "ndx", "nax.n", "nLx", "Tx",
+                                "Exp. Vida")
+  }
+  
+  
+  meu_dataframe[,1] = c("0< anos", "1 a 4 anos", "5 a 9 anos", "10 a 14 anos", "15 a 19 anos", "20 a 24 anos",
+                        "25 a 29 anos", "30 a 34 anos", "35 a 39 anos", "40 a 44 anos", "45 a 49 anos",
+                        "50 a 54 anos", "55 a 59 anos", "60 a 64 anos", "65 a 69 anos", "70 a 74 anos",
+                        "75 a 79 anos", "+80 anos")
+  
+  # Criar a tabela básica
+  tabela_basica <- kable(meu_dataframe)
+  
+  
+  # Definir paleta de cores
+  paleta_cores <- c("#dbdbdb", "#ffffff") # Azul claro e rosa claro
+  
+  # Aplicar formatação na tabela
+  tabela_estilizada <- tabela_basica %>%
+    kable_styling(full_width = FALSE) %>%
+    row_spec(0, bold = TRUE, italic = TRUE) %>%
+    row_spec(seq(1, 18, by = 2), background = paleta_cores[1]) %>%
+    row_spec(seq(2, 18, by = 2), background = paleta_cores[2]) %>%
+    column_spec(1, bold = TRUE) %>%
+    collapse_rows(columns = 2:ncol(minha_matriz), valign = "middle") %>%
+    row_spec(0, bold = TRUE, italic = TRUE, color = "white",
+             background = "#ff4747")
+  
+  tabela_estilizada = tabela_estilizada %>% 
+    kable_styling(bootstrap_options = "striped", full_width = FALSE) %>%
+    column_spec(1, border_right = TRUE) %>%
+    column_spec(2:3, border_left = TRUE, border_right = TRUE) %>%
+    column_spec(4, border_left = TRUE, border_right = TRUE) %>% 
+    column_spec(5:6, border_left = TRUE, border_right = TRUE) %>%
+    column_spec(7, border_left = TRUE, border_right = TRUE) %>% 
+    column_spec(8:9, border_left = TRUE, border_right = TRUE) %>%
+    column_spec(10:(numero-1), border_left = TRUE, border_right = TRUE) %>% 
+    column_spec(numero, bold = TRUE, border_left = TRUE, border_right = TRUE) %>% 
+    add_header_above(header = c(setNames(c(numero), header)),
+                   font_size = "large",
+                   background = "#B71C1C",
+                   color = "white")
+
+
+  return(tabela_estilizada)
+}
+```
+
+```{r}
+main_tabela_bonita <- main_tabela %>% 
+  prettify() %>% 
+  add_header_above(header = c(" "= 1, "1980" = 3,"2010" = 3,
+                              "1980" = 3, "2010" = 3),
+                   background = "#ff6161",
+                   color = "white") %>% 
+  add_header_above(header = c(" "= 1, "Homens" = 6, "Mulheres" = 6),
+                   background = "#ff4747",
+                   color = "white") %>% 
+  add_header_above(header = c("Expectativa de Vida em São Paulo por sexo em 1980 e 2010" = 13),
+                   font_size = "large",
+                   background = "#B71C1C",
+                   color = "white") %>%
+  kable_styling(bootstrap_options = "striped", full_width = FALSE) %>%
+  column_spec(1, border_right = TRUE) %>%
+  column_spec(2:3, border_left = TRUE, border_right = TRUE) %>%
+  column_spec(4, bold = TRUE, border_left = TRUE, border_right = TRUE) %>% 
+  column_spec(5:6, border_left = TRUE, border_right = TRUE) %>%
+  column_spec(7, bold = TRUE, border_left = TRUE, border_right = TRUE) %>% 
+  column_spec(8:9, border_left = TRUE, border_right = TRUE) %>%
+  column_spec(10, bold = TRUE, border_left = TRUE, border_right = TRUE) %>% 
+  column_spec(11:12, border_left = TRUE, border_right = TRUE) %>%
+  column_spec(13, bold = TRUE, border_left = TRUE)
+
+
+main_tabela_bonita
+
+```
+
+```{r}
+library(ggplot2)
+
+grafico_esp_1 = function(lista_matrizes, causa = NULL){
+  df_esperanca = c(lista_matrizes[[1]][,13], lista_matrizes[[2]][,13],
+                     lista_matrizes[[3]][,13], lista_matrizes[[4]][,13]) |> as.data.frame() 
+
+  colnames(df_esperanca) = "esperanca"
+  
+  titulo = "Esperança de Vida em São Paulo"
+  
+  if(!is.null(causa)){
+    titulo = paste(titulo, "descontando mortes por", causa)
+  }
+  
+  df_esperanca$ano = c(rep(1980, 18), rep(2010, 18), rep(1980, 18), rep(2010, 18))
+  df_esperanca$sexo = c(rep("Homem", 36), rep("Mulher", 36))
+  df_esperanca$idade = rep(lista_matrizes[[1]][,1], 4)
+  
+  plot1 = ggplot(data = df_esperanca)+
+    geom_line(aes(x = idade, y = esperanca, color = ano |> as.character()),
+              linewidth = 1)+
+    facet_wrap(~sexo)+
+    labs(x = "Idade", y = "Esperança de Vida", color = "Ano",
+         title = titulo,
+         subtitle = "Divisão por homens e mulheres nos anos de 1980 e 2010")+
+    theme_classic()
+  
+  return(plot1)
+}
+```
+
+```{r}
+grafico_esp_2 = function(lista_matrizes, causa = NULL){
+  df_esperanca = c(lista_matrizes[[1]][,13], lista_matrizes[[2]][,13],
+                     lista_matrizes[[3]][,13], lista_matrizes[[4]][,13]) |> as.data.frame() 
+  
+  df_esperanca = df_esperanca[c(1,19,37,55),] |> as.data.frame() 
+
+  colnames(df_esperanca) = "esperanca"
+  
+  df_esperanca$ano = c(1980, 2010, 1980, 2010)
+  df_esperanca$sexo = c("Homem", "Homem", "Mulher", "Mulher")
+  
+  titulo = "Esperança de Vida ao Nascer em São Paulo"
+  
+  if(!is.null(causa)){
+    titulo = paste(titulo, "descontando mortes por", causa)
+  }
+  
+  plot2 = ggplot(data = df_esperanca)+
+    geom_bar(aes(x = sexo, y = esperanca, fill = sexo),
+             stat = "identity", position = "dodge")+
+    facet_wrap(~ano)+
+    labs(x = "Sexo", y = "Esperança de Vida", fill = "Sexo",
+         title = titulo,
+         subtitle = "Divisão por homens e mulheres nos anos de 1980 e 2010")+
+    theme_classic()+
+    theme(axis.text.x = element_blank())
+  
+  return(plot2)
+}
+```
+
+
+```{r}
+plot1 = grafico_esp_1(lista_matrizes_norm)
+plot2 = grafico_esp_2(lista_matrizes_norm)
+```
+
+```{r}
+lista_mort = list(mort1980$V2, mort2010$V2, mort1980$V3, mort2010$V3)
+lista_pop = list(pop1980$V2, pop2010$V2, pop1980$V3, pop2010$V3)
+lista_neo = list(neo1980$V2, neo2010$V2, neo1980$V3, neo2010$V3)
+
+lista_tabelas = list()
+lista_matrizes_neo = list()
+
+
+for(n in 1:4){
+  if(n > 2){
+    fem = TRUE
+  }
+  else{
+    fem = FALSE
+  }
+  tabela = get_life_table(pop = lista_pop[[n]], mort = lista_mort[[n]],
+                          fem = fem, causa_mortis = lista_neo[[n]])
+  lista_matrizes_neo[[n]] = tabela
+  
+  if(n == 1){
+    tabela = tabela[,c(1,3,4,ncol(tabela))]
+    main_tabela = tabela
+  }
+  else{
+    tabela = tabela[,c(3,4,ncol(tabela))]
+    main_tabela = cbind(main_tabela, tabela)
+  }
+}
+```
+
+```{r}
+lista_mort = list(mort1980$V2, mort2010$V2, mort1980$V3, mort2010$V3)
+lista_pop = list(pop1980$V2, pop2010$V2, pop1980$V3, pop2010$V3)
+lista_ext = list(ext1980$V2, ext2010$V2, ext1980$V3, ext2010$V3)
+
+lista_tabelas = list()
+lista_matrizes_exp = list()
+
+
+for(n in 1:4){
+  if(n > 2){
+    fem = TRUE
+  }
+  else{
+    fem = FALSE
+  }
+  tabela = get_life_table(pop = lista_pop[[n]], mort = lista_mort[[n]],
+                          fem = fem, causa_mortis = lista_ext[[n]])
+  lista_matrizes_exp[[n]] = tabela
+  
+  if(n == 1){
+    tabela = tabela[,c(1,3,4,ncol(tabela))]
+    main_tabela = tabela
+  }
+  else{
+    tabela = tabela[,c(3,4,ncol(tabela))]
+    main_tabela = cbind(main_tabela, tabela)
+  }
+}
+```
+
+```{r}
+lista_tabuas = list()
+
+for(n in 1:4){
+  if(n < 3){
+    sexo = "Homens"
+  }
+  else{
+    sexo = "Mulheres"
+  }
+  if((n %% 2) == 0){
+    ano = 2010
+  }
+  else{
+    ano = 1980
+  }
+  
+  header = paste("Tábua de vida em São Paulo para", sexo, "no ano de", ano)
+  
+  tabua_norm = prettify_tabua(lista_matrizes_norm[[n]], header = header, norm = TRUE)
+  tabua_neo = prettify_tabua(lista_matrizes_neo[[n]],
+                             header = paste(header, "eliminando mortes por Neoplasias"),
+                             causa = "Neo")
+  tabua_exp = prettify_tabua(lista_matrizes_exp[[n]],
+                             header = paste(header, "eliminando mortes por Causas Externas"),
+                             causa = "CauExt")
+  lista_tabuas[[(n-1)*3 + 1]] = tabua_norm
+  lista_tabuas[[(n-1)*3 + 2]] = tabua_neo
+  lista_tabuas[[(n-1)*3 + 3]] = tabua_exp
+}
+```
+
+```{r}
+for(n in 1:12){
+  path = paste0("Tabelas/Tabua", n, ".png")
+  save_kable(lista_tabuas[[n]], path)
+}
+```
+
+```{r}
+TBM_ext_1980 = (sum(ext1980[,2:3] |>  unlist() |>
+                     gsub(pattern = "-", replacement = "0")|>
+                     as.numeric())/sum(pop1980[,2:3]) * 1000) |> round(digits = 3)
+TBM_ext_2010 = (sum(ext2010[,2:3] |>  unlist() |>
+                     gsub(pattern = "-", replacement = "0")|>
+                     as.numeric())/sum(pop2010[,2:3]) * 1000) |> round(digits = 3)
+
+dados = data.frame("Ano" = c(1980, 2010),
+                   `Taxa Bruta de Mortalidade por Causas Externas` = c(TBM_ext_1980, TBM_ext_2010))
+
+colnames(dados) = c("Ano", "Taxa Bruta de Mortalidade por Causas Externas")
+
+dados
+```
+
+```{r}
+library(ggplot2)
+
+grafico_comp = function(HN, MN, HC, MC, causa){
+  idade = HC[,1]
+  GH = (HC[,11] - HN[,13]) 
+  GM = (MC[,11] - MN[,13]) 
+  # HN = data.frame(ExpVida = HN[,11] |> unlist(), causa = "Normal", sexo = "Homens")
+  # MN = data.frame(ExpVida = MN[,11] |> unlist(), causa = "Normal", sexo = "Mulheres")
+  # HC = data.frame(ExpVida = HC[,11] |> unlist(), causa = causa, sexo = "Homens")
+  # MC = data.frame(ExpVida = MC[,11] |> unlist(), causa = causa, sexo = "Mulheres")
+  GH = data.frame(Idade = idade, Ganho = GH, Sexo = "Homens")
+  GM = data.frame(Idade = idade, Ganho = GM, Sexo = "Mulheres")
+  dados = rbind(GH, GM)
+  titulo = paste("Comparação de ganhos de expectativa de vida por idade, por sexo,\nexcluindo mortes por", causa)
+  
+  plot = ggplot(data = dados)+
+    geom_line(aes(x = Idade, y = Ganho, color = Sexo))+
+    geom_point(aes(x = Idade, y = Ganho, color = Sexo), size = 2)+
+    theme_classic()+
+    labs(title = titulo,
+         subtitle = "Dados na cidade de São Paulo, no ano de 2010",
+         y = "Ganho em Anos")
+  return(plot)
+}
+
+plot1 = grafico_comp(lista_matrizes_norm[[2]], lista_matrizes_norm[[4]],
+             lista_matrizes_neo[[2]], lista_matrizes_neo[[4]], "Neoplasias")
+plot2 = grafico_comp(lista_matrizes_norm[[2]], lista_matrizes_norm[[4]],
+             lista_matrizes_exp[[2]], lista_matrizes_exp[[4]], "Causas Externas")
+```
+
+```{r}
+lista_matrizes_exp[[2]][,3] - lista_matrizes_exp[[1]][,3]
+
+```
+
+
+
+
+

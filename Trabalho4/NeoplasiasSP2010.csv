@@ -1,0 +1,37 @@
+ Mortalidade - São Paulo
+Óbitos p/Residênc por Faixa Etária det e Sexo
+Município: 355030 SAO PAULO
+Capítulo CID-10: II.  Neoplasias (tumores)
+Período:2010
+"Faixa Etária det";"Masc";"Fem";"Total"
+"7 a 27 dias";1;-;1
+"28 a 364 dias";3;-;3
+"1 a 4 anos";12;15;27
+"5 a 9 anos";19;15;34
+"10 a 14 anos";13;16;29
+"15 a 19 anos";38;18;56
+"20 a 24 anos";37;29;66
+"25 a 29 anos";57;62;119
+"30 a 34 anos";68;91;159
+"35 a 39 anos";85;154;239
+"40 a 44 anos";164;216;380
+"45 a 49 anos";298;409;707
+"50 a 54 anos";581;575;1156
+"55 a 59 anos";746;694;1440
+"60 a 64 anos";843;719;1562
+"65 a 69 anos";897;737;1634
+"70 a 74 anos";925;793;1718
+"75 a 79 anos";862;771;1633
+"80 anos e mais";1311;1570;2881
+"Idade ignorada";2;-;2
+"Total";6962;6884;13846
+ Fonte: MS/SVS/CGIAE - Sistema de Informações sobre Mortalidade - SIM
+ Consulte o site da Secretaria Estadual de Saúde para mais informações.
+ Nota:
+ 
+ Em 2011, houve uma mudança no conteúdo da Declaração de Óbito, com maior detalhamento das informações coletadas. Para este ano, foram
+ utilizados simultaneamente os dois formulários. Para mais detalhes sobre as mudanças ocorridas e os seus efeitos, veja o documento
+ "Sistema de Informações sobre Mortalidade - SIM. Consolidação da base de dados de 2011".
+ No dia 13/06/2019, os arquivos do SIM referentes ao ano de notificação 2017 foram atualizados, com alteração das causas básicas de 2 registros e exclusão de 1 registro.
+ No dia 01/04/2020, os arquivos do SIM referentes ao ano de notificação 2019 foram atualizados, com alteração das causas básicas de 4 registros e exclusão de 1 registro.
+ 

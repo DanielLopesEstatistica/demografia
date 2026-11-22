@@ -1,0 +1,38 @@
+ Mortalidade - São Paulo
+Óbitos p/Residênc por Faixa Etária det e Sexo
+Município: 355030 SAO PAULO
+Período:2010
+"Faixa Etária det";"Masc";"Fem";"Ign";"Total"
+"0 a 6 dias";497;427;1;925
+"7 a 27 dias";234;189;-;423
+"28 a 364 dias";377;285;-;662
+"Menor 1 ano (ign)";2;-;-;2
+"1 a 4 anos";158;133;-;291
+"5 a 9 anos";88;62;-;150
+"10 a 14 anos";135;97;-;232
+"15 a 19 anos";547;198;-;745
+"20 a 24 anos";886;244;-;1130
+"25 a 29 anos";875;337;-;1212
+"30 a 34 anos";1006;381;-;1387
+"35 a 39 anos";1159;542;-;1701
+"40 a 44 anos";1510;734;-;2244
+"45 a 49 anos";1965;1163;-;3128
+"50 a 54 anos";2729;1565;-;4294
+"55 a 59 anos";3067;1898;-;4965
+"60 a 64 anos";3305;2203;-;5508
+"65 a 69 anos";3386;2481;-;5867
+"70 a 74 anos";3765;3171;-;6936
+"75 a 79 anos";3846;3876;-;7722
+"80 anos e mais";7725;12672;-;20397
+"Idade ignorada";203;25;4;232
+"Total";37465;32683;5;70153
+ Fonte: MS/SVS/CGIAE - Sistema de Informações sobre Mortalidade - SIM
+ Consulte o site da Secretaria Estadual de Saúde para mais informações.
+ Nota:
+ 
+ Em 2011, houve uma mudança no conteúdo da Declaração de Óbito, com maior detalhamento das informações coletadas. Para este ano, foram
+ utilizados simultaneamente os dois formulários. Para mais detalhes sobre as mudanças ocorridas e os seus efeitos, veja o documento
+ "Sistema de Informações sobre Mortalidade - SIM. Consolidação da base de dados de 2011".
+ No dia 13/06/2019, os arquivos do SIM referentes ao ano de notificação 2017 foram atualizados, com alteração das causas básicas de 2 registros e exclusão de 1 registro.
+ No dia 01/04/2020, os arquivos do SIM referentes ao ano de notificação 2019 foram atualizados, com alteração das causas básicas de 4 registros e exclusão de 1 registro.
+ 
